@@ -15,9 +15,9 @@
 
 ## 2. Giả thuyết (commit TRƯỚC tag `freeze`, Phần 4.0)
 
-- H1 (subagents so với baseline):
-- H2 (skills-auto so với baseline):
-- H3 (tác vụ học so với tác vụ đánh giá):
+- H1 (subagents so với baseline): `subagents` sẽ có điểm trung bình trên tác vụ đánh giá **không cao hơn** (dự đoán thấp hơn) `baseline`, với token trung bình cao gấp khoảng 3 lần. Căn cứ: trên tác vụ học, subagents đạt 13/18 check kỹ thuật so với 18/18 và 364.653 so với 109.701 token (×3,3); cơ chế là cô lập ngữ cảnh — lời giao việc bỏ sót quy tắc của đề (data-learn: thiếu tên khóa `answer.json`, reviewer trả PASS sai). Báo cáo của Anthropic về hệ thống nghiên cứu đa tác tử ghi nhận chi phí khoảng ×15 so với hội thoại, và lợi ích chỉ đến ở tác vụ song song hóa được; ba tác vụ ở đây tuần tự và nhỏ.
+- H2 (skills-auto so với baseline): `skills-auto` sẽ cao hơn `baseline` **chỉ ở họ `code`** (dự đoán +1 đến +2 check quy ước nhờ skill `comprehensive-regression-testing-and-changelogging` mã hóa các quy ước test hồi quy/CHANGELOG mà tác vụ đánh giá được nói là dùng lại), còn ở `data` và `logs` sẽ ngang baseline vì skill chung `adhere-to-strict-rule-specifications` không chứa giá trị quy ước. Check kỹ thuật không đổi (đã gần tối đa). Căn cứ: Phần 3.4 — code-learn 9/10 (baseline 7/10), data-learn 5/8 và logs-learn 6/9 bằng baseline dù `skills_read = 2`; SkillsBench ghi nhận skill do mô hình tự sinh trung bình không có lợi, nên kỳ vọng hiệu ứng nhỏ và cục bộ.
+- H3 (tác vụ học so với tác vụ đánh giá): mức cải thiện của `skills-auto` trên tác vụ đánh giá sẽ **nhỏ hơn** trên tác vụ học, và quy ước **mới** của mỗi tác vụ đánh giá sẽ thất bại ở cả ba điều kiện vì không có phản hồi nào về nó trong dữ liệu học. Căn cứ: SkillEvolBench ghi nhận lợi ích trên tác vụ học thường không chuyển sang tác vụ mới; skill được rút ra từ đúng các check của tác vụ học nên có xu hướng quá khớp.
 
 ## 3. Làm quen Deep Agents (Phần 0.3)
 
@@ -71,7 +71,7 @@ Ghi chú hạ tầng (không tính là lỗi tác tử): lần chạy baseline �
 | Skill | Tổng quát hay riêng cho tác vụ học? | Đúng hay sai (nêu chỗ sai nếu có) | Độ dài, `description` và `skills_read` ở Phần 3.4 |
 |---|---|---|---|
 | `comprehensive-regression-testing-and-changelogging` | Tổng quát cho họ "sửa lỗi codebase": nêu quy ước Acme (type hints mọi hàm public, `tests/test_regressions.py` một test/lỗi, `CHANGELOG.md` `## Unreleased` `- fix(<function name>): ...`) — tên tệp/định dạng là bản thân quy ước nên được phép; không nêu tên hàm hay tệp nguồn của `inventory`. | Đúng với cả 3 `detail` của code-learn. Thiếu "ít nhất 3". Bước 4 "verify that all test files remain intact" hữu ích (phòng `tests_not_modified`). Có một dòng thừa `<body>` (mô hình chép nhãn trong prompt mẫu) — vô hại. | 10 dòng; `description` "Use when fixing bugs or updating codebases that require regression tests and changelog entries" — điều kiện kích hoạt có thể quá hẹp: đề không nói "require regression tests", tác tử phải tự liên hệ. `skills_read`: (điền sau 3.4) |
-| `adhere-to-strict-rule-specifications` | Tổng quát (mọi tác vụ có quy tắc định dạng đầu ra); nhắc gián tiếp các quy ước data/logs qua ví dụ. | Không sai, nhưng **không đủ**: không chứa giá trị quy ước nên khó giúp các check `rule_` của data/logs; giá trị chủ yếu là nhắc "viết script kiểm tra mọi ràng buộc". Có dòng `<body>` thừa. | 10 dòng; `description` "Use when completing tasks with specific schema, output naming, formatting, or organizational rules" — rộng, dễ kích hoạt. `skills_read`: (điền sau 3.4) |
+| `adhere-to-strict-rule-specifications` | Tổng quát (mọi tác vụ có quy tắc định dạng đầu ra); nhắc gián tiếp các quy ước data/logs qua ví dụ. | Không sai, nhưng **không đủ**: không chứa giá trị quy ước nên khó giúp các check `rule_` của data/logs; giá trị chủ yếu là nhắc "viết script kiểm tra mọi ràng buộc". Có dòng `<body>` thừa. | 10 dòng; `description` "Use when completing tasks with specific schema, output naming, formatting, or organizational rules" — rộng, dễ kích hoạt. Phần 3.4: được đọc ở cả 3 tác vụ (vết data-learn/logs-learn chứa nội dung skill) nhưng data-learn 5/8 và logs-learn 6/9 **bằng baseline**: 0/6 check quy ước — skill không cho biết giá trị quy ước, và khi đề nói `north_q1_revenue` là "number" tác tử làm theo đề. |
 
 ## 7. Kết quả so sánh (Phần 4.3, 4.4)
 
